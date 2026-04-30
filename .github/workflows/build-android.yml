@@ -19,28 +19,17 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Cache node_modules
-      uses: actions/cache@v4
-      with:
-        path: |
-          node_modules
-        key: ${{ runner.os }}-node-${{ hashFiles('package.json') }}
-        restore-keys: ${{ runner.os }}-node-
-
     - name: Initialize React Native project (if android/ missing)
       run: |
         if [ ! -d "android" ]; then
           echo "android/ not found, initializing React Native project..."
-          # npx react-native init creates a directory with the given name
-          npx react-native@0.74.x init SmartCalendar --skip-install
+          # Let init run fully (it will run npm install internally)
+          npx react-native@0.74.x init SmartCalendar
           echo "Init done. Listing generated files..."
           ls -la SmartCalendar/
 
           echo "Copying android/ to repo root..."
           cp -r SmartCalendar/android ./
-
-          echo "Copying ios/ to repo root (if exists)..."
-          [ -d "SmartCalendar/ios" ] && cp -r SmartCalendar/ios ./ || echo "No ios/ directory, skipping."
 
           echo "Copying config files..."
           [ -f "SmartCalendar/app.json" ] && cp SmartCalendar/app.json ./
@@ -48,7 +37,7 @@ jobs:
           [ -f "SmartCalendar/babel.config.js" ] && cp SmartCalendar/babel.config.js ./
 
           echo "Cleaning up temp directory..."
-          rm -rf SmartCalendar
+          rm -rf SmartCalendar/
 
           echo "android/ directory created successfully"
           ls -la android/
@@ -56,8 +45,14 @@ jobs:
           echo "android/ directory already exists, skipping init."
         fi
 
-    - name: Install dependencies
-      run: npm install
+    - name: Install dependencies (if not done by init)
+      run: |
+        if [ ! -d "node_modules" ]; then
+          echo "Installing dependencies..."
+          npm install
+        else
+          echo "node_modules exists, skipping npm install."
+        fi
 
     - name: Build debug APK
       run: cd android && ./gradlew assembleDebug
