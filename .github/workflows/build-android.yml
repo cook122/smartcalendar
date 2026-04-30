@@ -1,4 +1,5 @@
 name: Build Android Debug
+
 on:
   push:
     branches: [main]
@@ -7,58 +8,46 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - uses: actions/setup-node@v4
-      with:
-        node-version: '18'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
 
-    - uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-    - name: Initialize React Native project (if android/ missing)
-      run: |
-        if [ ! -d "android" ]; then
-          echo "android/ not found, initializing React Native project..."
-          # Let init run fully (it will run npm install internally)
-          npx react-native@0.74.x init SmartCalendar
-          echo "Init done. Listing generated files..."
-          ls -la SmartCalendar/
+      - name: Install dependencies
+        run: npm install
 
-          echo "Copying android/ to repo root..."
-          cp -r SmartCalendar/android ./
+      - name: Generate android project (if missing)
+        if: ${{ !hashFiles('android/build.gradle') }}
+        run: |
+          echo "android/ not found, generating via react-native init..."
+          cd /tmp
+          npx react-native@0.74.x init TempApp
+          cp -r /tmp/TempApp/android "${{ github.workspace }}/android"
+          rm -rf /tmp/TempApp
 
-          echo "Copying config files..."
-          [ -f "SmartCalendar/app.json" ] && cp SmartCalendar/app.json ./
-          [ -f "SmartCalendar/index.js" ] && cp SmartCalendar/index.js ./
-          [ -f "SmartCalendar/babel.config.js" ] && cp SmartCalendar/babel.config.js ./
-
-          echo "Cleaning up temp directory..."
-          rm -rf SmartCalendar/
-
-          echo "android/ directory created successfully"
+      - name: Verify android directory
+        run: |
+          if [ ! -f "android/build.gradle" ]; then
+            echo "ERROR: android/build.gradle not found after generation step"
+            exit 1
+          fi
+          echo "android/ directory ready"
           ls -la android/
-        else
-          echo "android/ directory already exists, skipping init."
-        fi
 
-    - name: Install dependencies (if not done by init)
-      run: |
-        if [ ! -d "node_modules" ]; then
-          echo "Installing dependencies..."
-          npm install
-        else
-          echo "node_modules exists, skipping npm install."
-        fi
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
 
-    - name: Build debug APK
-      run: cd android && ./gradlew assembleDebug
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: smartcalendar-debug-${{ github.sha }}
-        path: android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartcalendar-debug-${{ github.sha }}
+          path: android/app/build/outputs/apk/debug/app-debug.apk
