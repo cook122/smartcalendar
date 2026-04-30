@@ -57,7 +57,7 @@ export default function EventEditScreen() {
         </TouchableOpacity>
       ),
     });
-  }, [navigation, isEditing, title, startDate, startTime, endTime, recurrenceRule]);
+  }, [navigation, isEditing, handleSave, title, startDate, startTime, endTime, recurrenceRule]);
 
   const handleSave = useCallback(async () => {
     const trimmedTitle = title.trim();

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, TextInput, Switch } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, TextInput, Switch, Clipboard } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation';
@@ -52,11 +52,15 @@ export default function LogViewerScreen() {
   const copyToClipboard = async () => {
     const text = filtered.map(l => `[${l.timestamp}][${l.level}][${l.tag}] ${l.message}`).join('\n');
     try {
-      const { Clipboard } = require('react-native');
       Clipboard.setString(text);
       alert('日志已复制到剪贴板');
     } catch (_) {
-      // Clipboard not available
+      // Fallback for older RN versions
+      try {
+        const RNClipboard = require('@react-native-clipboard/clipboard').default;
+        RNClipboard.setString(text);
+        alert('日志已复制到剪贴板');
+      } catch (_2) {}
     }
   };
 

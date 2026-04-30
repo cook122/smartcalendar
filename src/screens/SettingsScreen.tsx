@@ -4,8 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types/navigation';
 import { useEventStore } from '../../stores/eventStore';
-import { getSettings, saveSettings, AppSettings, DEFAULT_SETTINGS } from '../../storage/eventRepo';
-import { EVENT_COLORS } from '../../types';
+import { getSettings, saveSettings } from '../../storage/eventRepo';
+import { AppSettings, DEFAULT_SETTINGS, EVENT_COLORS } from '../../types';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Settings'>;

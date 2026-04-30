@@ -1,12 +1,12 @@
 import { CalendarEvent } from '../types';
 import { logger } from '../utils/logger';
 
-const timers: NodeJS.Timeout[] = [];
+const timers: ReturnType<typeof setTimeout>[] = [];
 
 export function scheduleAllReminders(events: CalendarEvent[]): void {
   clearAllReminders();
   const now = new Date();
-  const nextHour = new Date(now.getTime() + 60 * 60 * 1000); // 只扫未来1小时
+  const nextHour = new Date(now.getTime() + 60 * 60 * 1000);
 
   events.forEach(event => {
     if (event.reminderMinutes === null || event.reminderMinutes === undefined) return;
@@ -36,7 +36,7 @@ export function clearAllReminders(): void {
 
 function triggerNotification(event: CalendarEvent): void {
   try {
-    const { PushNotification } = require('react-native-push-notification');
+    const PushNotification = require('react-native-push-notification').default || require('react-native-push-notification');
     const eventTime = new Date(event.startAt);
     PushNotification.localNotification({
       channelId: 'smartcalendar-reminders',
@@ -53,7 +53,7 @@ function triggerNotification(event: CalendarEvent): void {
 
 export function setupNotificationChannel(): void {
   try {
-    const { PushNotification } = require('react-native-push-notification');
+    const PushNotification = require('react-native-push-notification').default || require('react-native-push-notification');
     PushNotification.createChannel(
       {
         channelId: 'smartcalendar-reminders',

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView } from 'react-native';
 import { RecurrenceRule } from '../../types';
-import { EVENT_COLORS } from '../../types';
+import { getRuleDescription } from '../../services/RecurrenceEngine';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 interface Props {
@@ -205,16 +205,6 @@ export default function RecurrencePicker({ value, onChange }: Props) {
       )}
     </View>
   );
-}
-
-function getRuleDescription(rule: RecurrenceRule): string {
-  const freqMap: Record<string, string> = {
-    daily: '每天',
-    weekly: '每周',
-    monthly: '每月',
-    yearly: '每年',
-  };
-  return freqMap[rule.frequency] || rule.frequency;
 }
 
 const styles = StyleSheet.create({

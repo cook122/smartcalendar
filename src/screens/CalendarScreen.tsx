@@ -9,6 +9,7 @@ import MonthView from '../components/calendar/MonthView';
 import DayEventsList from '../components/calendar/DayEventsList';
 import { getEventsForDay } from '../../services/CalendarService';
 import { format } from 'date-fns';
+import { CalendarEvent } from '../../types';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Calendar'>;
@@ -36,7 +37,7 @@ export default function CalendarScreen() {
     });
   }, [navigation, selectedDate]);
 
-  const handleEventPress = useCallback((event: any) => {
+  const handleEventPress = useCallback((event: CalendarEvent) => {
     navigation.navigate('Event', { eventId: event.id });
   }, [navigation]);
 

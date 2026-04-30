@@ -6,10 +6,7 @@ import { RouteProp } from '@react-navigation/native';
 import { useEventStore } from '../../stores/eventStore';
 import { RootStackParamList } from '../../types/navigation';
 import EventDetail from '../components/event/EventDetail';
-import { CalendarEvent } from '../../types';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { getEventsForDay } from '../../services/CalendarService';
-import { deleteEvent } from '../../services/EventService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Event'>;
 type RouteProp = RouteProp<RootStackParamList, 'Event'>;
@@ -20,15 +17,9 @@ export default function EventScreen() {
   const { eventId, date, isExceptionInstance } = route.params;
   const getEventById = useEventStore(s => s.getEventById);
   const deleteEventStore = useEventStore(s => s.deleteEvent);
-  const events = useEventStore(s => s.events);
   const [deleting, setDeleting] = useState(false);
 
   const event = useMemo(() => getEventById(eventId), [eventId, getEventById]);
-
-  const relatedEvents = useMemo(() => {
-    if (!event?.recurrenceRule || !date) return [];
-    return getEventsForDay(events, date).filter(e => e.id === eventId || e.originalEventId === eventId);
-  }, [event, events, date]);
 
   const handleEdit = useCallback(() => {
     if (!event) return;
@@ -59,21 +50,21 @@ export default function EventScreen() {
       {
         text: '仅此一次', onPress: async () => {
           setDeleting(true);
-          await deleteEvent(event.id, 'this', date);
+          await deleteEventStore(event.id, 'this', date);
           navigation.goBack();
         },
       },
       {
         text: '此后所有', onPress: async () => {
           setDeleting(true);
-          await deleteEvent(event.id, 'future', date);
+          await deleteEventStore(event.id, 'future', date);
           navigation.goBack();
         },
       },
       {
         text: '全部', style: 'destructive', onPress: async () => {
           setDeleting(true);
-          await deleteEvent(event.id);
+          await deleteEventStore(event.id);
           navigation.goBack();
         },
       },

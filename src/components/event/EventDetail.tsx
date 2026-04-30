@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { CalendarEvent, RecurrenceRule } from '../../types';
+import { CalendarEvent } from '../../types';
 import { format, parseISO } from 'date-fns';
 import { getRuleDescription } from '../../services/RecurrenceEngine';
 import Icon from 'react-native-vector-icons/FontAwesome';

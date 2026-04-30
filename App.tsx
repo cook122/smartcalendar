@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { StatusBar, Platform } from 'react-native';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useEventStore } from './src/stores/eventStore';

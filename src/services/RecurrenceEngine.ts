@@ -1,5 +1,5 @@
 import { RecurrenceRule } from '../types';
-import { toISODate, addMonthsKeepDay, findNthWeekday, addDays, addWeeks, getYear, isLeapYear, getMonth, getDate } from '../utils/dateUtils';
+import { toISODate, addMonthsKeepDay, findNthWeekday, addDays, addWeeks, getYear, getMonth, getDate } from '../utils/dateUtils';
 
 interface Occurrence {
   date: string;
@@ -15,74 +15,63 @@ export function getOccurrences(
 ): Occurrence[] {
   const result: Occurrence[] = [];
   const startDate = new Date(startAt);
-  const startTime = startAt.slice(11, 19); // HH:mm:ss
+  const startTime = startAt.slice(11, 19);
   const rStart = new Date(rangeStart + 'T00:00:00');
   const rEnd = new Date(rangeEnd + 'T23:59:59');
   const maxIterations = 1000;
 
+  // work on a copy to avoid mutating input
+  const localRule: RecurrenceRule = { ...rule, byDay: rule.byDay ? [...rule.byDay] : undefined };
+
   let count = 0;
   let current: Date;
 
-  switch (rule.frequency) {
+  switch (localRule.frequency) {
     case 'daily':
       current = new Date(startAt);
       current.setHours(0, 0, 0, 0);
       while (current <= rEnd && count < maxIterations) {
         if (current >= rStart) {
-          const dateStr = toISODate(current);
-          if (!isException(rule, dateStr)) {
-            result.push({ date: dateStr, time: startTime, isException: false });
-            count++;
-          } else {
-            result.push({ date: dateStr, time: startTime, isException: true });
-          }
+          addResult(result, localRule, current, startTime, count);
+          if (!isException(localRule, toISODate(current))) count++;
         }
-        if (rule.endType === 'count' && count >= (rule.endCount || 0)) break;
-        if (rule.endType === 'until') {
-          const until = new Date(rule.endUntil! + 'T00:00:00');
+        if (localRule.endType === 'count' && count >= (localRule.endCount || 0)) break;
+        if (localRule.endType === 'until') {
+          const until = new Date(localRule.endUntil! + 'T00:00:00');
           if (current > until) break;
         }
-        current = addDays(current, rule.interval);
+        current = addDays(current, localRule.interval);
       }
       break;
 
     case 'weekly':
-      if (!rule.byDay || rule.byDay.length === 0) {
-        rule.byDay = [startDate.getDay()];
+      if (!localRule.byDay || localRule.byDay.length === 0) {
+        localRule.byDay = [startDate.getDay()];
       }
-      const weekStart = new Date(startDate);
-      weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() - startDate.getDay() + 7) % 7));
       let weekCounter = 0;
       while (true) {
-        const weekStart = new Date(startDate);
-        weekStart.setDate(weekStart.getDate() + weekCounter * rule.interval * 7);
-        let weekHadResults = false;
-        for (const dayOffset of rule.byDay!) {
-          const candidate = addDays(weekStart, ((dayOffset - startDate.getDay()) + 7) % 7);
+        const weekBase = new Date(startDate);
+        weekBase.setDate(weekBase.getDate() + weekCounter * localRule.interval * 7);
+        for (const dayOffset of localRule.byDay!) {
+          const candidate = addDays(weekBase, ((dayOffset - startDate.getDay()) + 7) % 7);
           if (candidate < startDate) continue;
           if (candidate > rEnd) break;
           if (candidate >= rStart) {
-            const dateStr = toISODate(candidate);
-            if (!isException(rule, dateStr)) {
-              result.push({ date: dateStr, time: startTime, isException: false });
-              count++;
-            } else {
-              result.push({ date: dateStr, time: startTime, isException: true });
-            }
-            weekHadResults = true;
+            addResult(result, localRule, candidate, startTime, count);
+            if (!isException(localRule, toISODate(candidate))) count++;
           }
-          if (rule.endType === 'count' && count >= (rule.endCount || 0)) break;
-          if (rule.endType === 'until') {
-            const until = new Date(rule.endUntil! + 'T00:00:00');
+          if (localRule.endType === 'count' && count >= (localRule.endCount || 0)) break;
+          if (localRule.endType === 'until') {
+            const until = new Date(localRule.endUntil! + 'T00:00:00');
             if (candidate > until) break;
           }
         }
-        if (rule.endType === 'count' && count >= (rule.endCount || 0)) break;
-        if (rule.endType === 'until') {
-          const until = new Date(rule.endUntil! + 'T00:00:00');
-          if (addWeeks(weekStart, rule.interval) > until) break;
+        if (localRule.endType === 'count' && count >= (localRule.endCount || 0)) break;
+        if (localRule.endType === 'until') {
+          const until = new Date(localRule.endUntil! + 'T00:00:00');
+          if (addWeeks(weekBase, localRule.interval) > until) break;
         }
-        if (addWeeks(weekStart, rule.interval) > rEnd) break;
+        if (addWeeks(weekBase, localRule.interval) > rEnd) break;
         weekCounter++;
         if (weekCounter > maxIterations) break;
       }
@@ -92,33 +81,28 @@ export function getOccurrences(
       current = new Date(startDate);
       while (current <= rEnd && count < maxIterations) {
         if (current >= rStart) {
-          const dateStr = toISODate(current);
-          if (!isException(rule, dateStr)) {
-            result.push({ date: dateStr, time: startTime, isException: false });
-            count++;
-          } else {
-            result.push({ date: dateStr, time: startTime, isException: true });
-          }
+          addResult(result, localRule, current, startTime, count);
+          if (!isException(localRule, toISODate(current))) count++;
         }
-        if (rule.endType === 'count' && count >= (rule.endCount || 0)) break;
-        if (rule.endType === 'until') {
-          const until = new Date(rule.endUntil! + 'T00:00:00');
+        if (localRule.endType === 'count' && count >= (localRule.endCount || 0)) break;
+        if (localRule.endType === 'until') {
+          const until = new Date(localRule.endUntil! + 'T00:00:00');
           if (current > until) break;
         }
-        if (rule.byMonthDay) {
-          current = addMonthsKeepDay(current, rule.interval);
-        } else if (rule.bySetPos !== undefined && rule.byDay) {
-          const nextMonth = getMonth(current) + rule.interval;
+        if (localRule.byMonthDay) {
+          current = addMonthsKeepDay(current, localRule.interval);
+        } else if (localRule.bySetPos !== undefined && localRule.byDay) {
+          const nextMonth = getMonth(current) + localRule.interval;
           const nextYear = getYear(current) + Math.floor(nextMonth / 12);
           const adjMonth = ((nextMonth % 12) + 12) % 12 || 12;
-          const candidate = findNthWeekday(nextYear, adjMonth, rule.byDay[0], rule.bySetPos);
+          const candidate = findNthWeekday(nextYear, adjMonth, localRule.byDay[0], localRule.bySetPos);
           if (candidate) {
             current = candidate;
           } else {
-            current = addMonthsKeepDay(current, rule.interval);
+            current = addMonthsKeepDay(current, localRule.interval);
           }
         } else {
-          current = addMonthsKeepDay(current, rule.interval);
+          current = addMonthsKeepDay(current, localRule.interval);
         }
       }
       break;
@@ -127,27 +111,22 @@ export function getOccurrences(
       current = new Date(startDate);
       while (current <= rEnd && count < maxIterations) {
         if (current >= rStart) {
-          const dateStr = toISODate(current);
-          if (!isException(rule, dateStr)) {
-            result.push({ date: dateStr, time: startTime, isException: false });
-            count++;
-          } else {
-            result.push({ date: dateStr, time: startTime, isException: true });
-          }
+          addResult(result, localRule, current, startTime, count);
+          if (!isException(localRule, toISODate(current))) count++;
         }
-        if (rule.endType === 'count' && count >= (rule.endCount || 0)) break;
-        if (rule.endType === 'until') {
-          const until = new Date(rule.endUntil! + 'T00:00:00');
+        if (localRule.endType === 'count' && count >= (localRule.endCount || 0)) break;
+        if (localRule.endType === 'until') {
+          const until = new Date(localRule.endUntil! + 'T00:00:00');
           if (current > until) break;
         }
         current = new Date(current);
-        current.setFullYear(current.getFullYear() + rule.interval);
-        if (rule.byMonthDay && getDate(current) !== rule.byMonthDay) {
+        current.setFullYear(current.getFullYear() + localRule.interval);
+        if (localRule.byMonthDay && getDate(current) !== localRule.byMonthDay) {
           const lastDay = new Date(getYear(current), getMonth(current) + 1, 0);
-          if (rule.byMonthDay > getDate(lastDay)) {
+          if (localRule.byMonthDay > getDate(lastDay)) {
             current.setDate(getDate(lastDay));
           } else {
-            current.setDate(rule.byMonthDay);
+            current.setDate(localRule.byMonthDay);
           }
         }
       }
@@ -155,6 +134,18 @@ export function getOccurrences(
   }
 
   return result;
+}
+
+function addResult(
+  result: Occurrence[],
+  rule: RecurrenceRule,
+  date: Date,
+  time: string,
+  currentCount: number
+): void {
+  const dateStr = toISODate(date);
+  const isExc = isException(rule, dateStr);
+  result.push({ date: dateStr, time, isException: isExc });
 }
 
 function isException(rule: RecurrenceRule, date: string): boolean {
@@ -166,8 +157,8 @@ export function getNextOccurrence(
   startAt: string,
   afterDate: string
 ): string | null {
-  const after = new Date(afterDate + 'T00:00:00');
   const startDate = new Date(startAt);
+  const after = new Date(afterDate + 'T00:00:00');
   if (after < startDate) {
     return toISODate(startDate);
   }
