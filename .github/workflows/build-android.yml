@@ -21,29 +21,33 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set npm mirror
-        run: npm config set registry https://registry.npmmirror.com
-
       - name: Install dependencies
         run: npm install
 
       - name: Generate android project (if missing)
         if: ${{ !hashFiles('android/build.gradle') }}
         run: |
-          echo "android/ not found, initializing React Native project..."
+          echo "android/ not found, extracting from react-native package..."
           cd /tmp
-          npx --yes react-native@0.74.7 init TempApp --skip-install 2>&1
-          echo "--- TempApp contents ---"
-          ls -la /tmp/TempApp/ 2>/dev/null || echo "TempApp not found"
 
-          if [ -d "/tmp/TempApp/android" ]; then
-            cp -r /tmp/TempApp/android "${{ github.workspace }}/android"
-            rm -rf /tmp/TempApp
-            echo "android/ copied successfully"
+          # Download react-native package tarball
+          PACKAGE_URL=$(npm view react-native@0.74.7 dist.tarball)
+          echo "Downloading: $PACKAGE_URL"
+          curl -L -o react-native.tgz "$PACKAGE_URL" 2>&1
+
+          # Extract and find android/ template
+          tar -xzf react-native.tgz
+          if [ -d "package/template/android" ]; then
+            cp -r package/template/android "${{ github.workspace }}/android"
+            echo "android/ extracted from react-native package"
+            ls -la "${{ github.workspace }}/android/"
           else
-            echo "ERROR: android/ not found in TempApp"
+            echo "ERROR: android/ not found in package template"
+            ls -la package/template/ 2>/dev/null || echo "template/ not found"
+            ls -la package/ 2>/dev/null || echo "package/ not found"
             exit 1
           fi
+          rm -rf react-native.tgz package
 
       - name: Verify android directory
         run: |
@@ -52,7 +56,6 @@ jobs:
             exit 1
           fi
           echo "android/ ready"
-          ls -la android/
 
       - name: Build debug APK
         working-directory: android
