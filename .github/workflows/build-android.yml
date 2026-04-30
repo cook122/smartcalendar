@@ -1,0 +1,51 @@
+name: Build Android Debug
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+        restore-keys: ${{ runner.os }}-gradle-
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Validate android directory
+      run: |
+        if [ ! -d "android" ]; then
+          echo "ERROR: android/ directory not found. Project must be initialized with 'npx react-native init' first."
+          echo "Current directory contents:"
+          ls -la
+          exit 1
+        fi
+
+    - name: Build debug APK
+      run: cd android && ./gradlew assembleDebug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: smartcalendar-debug-${{ github.sha }}
+        path: android/app/build/outputs/apk/debug/app-debug.apk
