@@ -19,17 +19,26 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Install dependencies
-      run: npm install
-
-    - name: Validate android directory
+    - name: Initialize React Native project (if android/ missing)
       run: |
         if [ ! -d "android" ]; then
-          echo "ERROR: android/ directory not found. Project must be initialized with 'npx react-native init' first."
-          echo "Current directory contents:"
-          ls -la
-          exit 1
+          echo "android/ not found, initializing React Native project..."
+          npx react-native@0.74.x init SmartCalendar --skip-install --pm npm
+          echo "Copying android/ and ios/ (if any) to repo root..."
+          cp -r SmartCalendar/android ./
+          cp -r SmartCalendar/ios ./ 2>/dev/null || true
+          cp SmartCalendar/app.json ./
+          cp SmartCalendar/index.js ./
+          cp SmartCalendar/babel.config.js ./
+          rm -rf SmartCalendar
+          echo "android/ directory created successfully"
+          ls -la android/
+        else
+          echo "android/ directory already exists, skipping init."
         fi
+
+    - name: Install dependencies
+      run: npm install
 
     - name: Build debug APK
       run: cd android && ./gradlew assembleDebug
