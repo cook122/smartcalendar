@@ -19,18 +19,37 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
+    - name: Cache node_modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('package.json') }}
+        restore-keys: ${{ runner.os }}-node-
+
     - name: Initialize React Native project (if android/ missing)
       run: |
         if [ ! -d "android" ]; then
           echo "android/ not found, initializing React Native project..."
-          npx react-native@0.74.x init SmartCalendar --skip-install --pm npm
-          echo "Copying android/ and ios/ (if any) to repo root..."
+          # npx react-native init creates a directory with the given name
+          npx react-native@0.74.x init SmartCalendar --skip-install
+          echo "Init done. Listing generated files..."
+          ls -la SmartCalendar/
+
+          echo "Copying android/ to repo root..."
           cp -r SmartCalendar/android ./
-          cp -r SmartCalendar/ios ./ 2>/dev/null || true
-          cp SmartCalendar/app.json ./
-          cp SmartCalendar/index.js ./
-          cp SmartCalendar/babel.config.js ./
+
+          echo "Copying ios/ to repo root (if exists)..."
+          [ -d "SmartCalendar/ios" ] && cp -r SmartCalendar/ios ./ || echo "No ios/ directory, skipping."
+
+          echo "Copying config files..."
+          [ -f "SmartCalendar/app.json" ] && cp SmartCalendar/app.json ./
+          [ -f "SmartCalendar/index.js" ] && cp SmartCalendar/index.js ./
+          [ -f "SmartCalendar/babel.config.js" ] && cp SmartCalendar/babel.config.js ./
+
+          echo "Cleaning up temp directory..."
           rm -rf SmartCalendar
+
           echo "android/ directory created successfully"
           ls -la android/
         else
