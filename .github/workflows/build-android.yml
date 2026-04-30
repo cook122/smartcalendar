@@ -21,23 +21,22 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Set npm mirror
+        run: npm config set registry https://registry.npmmirror.com
+
       - name: Install dependencies
         run: npm install
 
       - name: Generate android project (if missing)
         if: ${{ !hashFiles('android/build.gradle') }}
         run: |
-          echo "android/ not found, generating via react-native init..."
+          echo "android/ not found, initializing React Native project..."
           cd /tmp
-          # Use --skip-install to skip iOS pod install (faster and avoids iOS-only failures)
           npx --yes react-native@0.74.7 init TempApp --skip-install 2>&1
           echo "--- TempApp contents ---"
-          ls -la /tmp/TempApp/ 2>/dev/null || echo "TempApp dir not found"
-          echo "--- /tmp contents ---"
-          ls -la /tmp/ | head -20
+          ls -la /tmp/TempApp/ 2>/dev/null || echo "TempApp not found"
 
           if [ -d "/tmp/TempApp/android" ]; then
-            echo "Copying android/ to workspace..."
             cp -r /tmp/TempApp/android "${{ github.workspace }}/android"
             rm -rf /tmp/TempApp
             echo "android/ copied successfully"
@@ -50,10 +49,9 @@ jobs:
         run: |
           if [ ! -f "android/build.gradle" ]; then
             echo "ERROR: android/build.gradle not found"
-            ls -la android/ 2>/dev/null || echo "android/ dir missing"
             exit 1
           fi
-          echo "android/ directory ready"
+          echo "android/ ready"
           ls -la android/
 
       - name: Build debug APK
