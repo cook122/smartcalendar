@@ -24,12 +24,3 @@ jobs:
 
       - name: Run tests
         run: npx jest --ci --no-cache --verbose 2>&1
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: |
-            coverage/
-            test-report.json
