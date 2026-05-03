@@ -55,12 +55,7 @@ export default function LogViewerScreen() {
       Clipboard.setString(text);
       alert('日志已复制到剪贴板');
     } catch (_) {
-      // Fallback for older RN versions
-      try {
-        const RNClipboard = require('@react-native-clipboard/clipboard').default;
-        RNClipboard.setString(text);
-        alert('日志已复制到剪贴板');
-      } catch (_2) {}
+      alert('复制功能暂不可用');
     }
   };
 
