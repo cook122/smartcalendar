@@ -63,11 +63,7 @@ jobs:
       - name: Configure ABI splits
         run: |
           if [ -f "android/app/build.gradle" ] && ! grep -q "splits {" android/app/build.gradle; then
-            python3 << 'PYEOF'
-import re
-with open('android/app/build.gradle', 'r') as f:
-    content = f.read()
-splits_config = '''
+            cat >> android/app/build.gradle << 'SPLITS'
 
     splits {
         abi {
@@ -77,12 +73,8 @@ splits_config = '''
             universalApk true
         }
     }
-'''
-content = re.sub(r'(android\s*\{[^}]+)\}', r'\1' + splits_config + r'\2', content, flags=re.DOTALL)
-with open('android/app/build.gradle', 'w') as f:
-    f.write(content)
-print("ABI splits configured")
-PYEOF
+}
+SPLITS
           fi
 
       - name: Build debug APK
