@@ -1,9 +1,10 @@
-const {getDefaultConfig, mergeConfig} = require('metro-config');
-
-const config = {
-  resolver: {
-    sourceExts: ['jsx', 'js', 'ts', 'tsx', 'json'],
+module.exports = {
+  transformer: {
+    getTransformOptions: async () => ({
+      transform: {
+        experimentalImportSupport: false,
+        inlineRequires: true,
+      },
+    }),
   },
 };
-
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
