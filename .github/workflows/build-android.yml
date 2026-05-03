@@ -64,6 +64,11 @@ jobs:
           SCRIPT
           node add_splits.js
 
+      - name: Bundle JS for standalone APK
+        run: |
+          mkdir -p android/app/src/main/assets
+          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug
