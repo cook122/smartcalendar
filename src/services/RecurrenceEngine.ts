@@ -165,8 +165,7 @@ export function getNextOccurrence(
   const endDate = new Date(afterDate + 'T00:00:00');
   endDate.setDate(endDate.getDate() + 365);
   const occurrences = getOccurrences(rule, startAt, afterDate, toISODate(endDate));
-  const afterISO = toISODate(after);
-  return occurrences.find(o => !o.isException && o.date >= afterDate)?.date || null;
+  return occurrences.find(o => !o.isException && o.date > afterDate)?.date || null;
 }
 
 export function getRuleDescription(rule: RecurrenceRule): string {
