@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'rea
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
-import { useEventStore } from '../../stores/eventStore';
-import { RootStackParamList } from '../../types/navigation';
+import { useEventStore } from '../stores/eventStore';
+import { RootStackParamList } from '../types/navigation';
 import EventDetail from '../components/event/EventDetail';
 import Icon from 'react-native-vector-icons/FontAwesome';
 

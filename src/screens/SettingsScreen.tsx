@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../types/navigation';
+import { RootStackParamList } from '../types/navigation';
 import { useEventStore } from '../../stores/eventStore';
 import { getSettings, saveSettings } from '../../storage/eventRepo';
 import { AppSettings, DEFAULT_SETTINGS, EVENT_COLORS } from '../../types';

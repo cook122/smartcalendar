@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, TextInput, Switch, Clipboard } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../types/navigation';
+import { RootStackParamList } from '../types/navigation';
 import { useLogStore } from '../../stores/logStore';
 import Icon from 'react-native-vector-icons/FontAwesome';
 

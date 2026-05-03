@@ -3,15 +3,15 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Switch
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
-import { useEventStore } from '../../stores/eventStore';
-import { RootStackParamList } from '../../types/navigation';
-import { CalendarEvent, RecurrenceRule } from '../../types';
-import { createEvent, updateEvent } from '../../services/EventService';
-import { getRuleDescription } from '../../services/RecurrenceEngine';
+import { useEventStore } from '../stores/eventStore';
+import { RootStackParamList } from '../types/navigation';
+import { CalendarEvent, RecurrenceRule } from '../types';
+import { createEvent, updateEvent } from '../services/EventService';
+import { getRuleDescription } from '../services/RecurrenceEngine';
 import RecurrencePicker from '../components/recurrence/RecurrencePicker';
 import ReminderPicker from '../components/reminder/ReminderPicker';
 import ColorPicker from '../components/event/ColorPicker';
-import { EVENT_COLORS } from '../../types';
+import { EVENT_COLORS } from '../types';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { format, parseISO } from 'date-fns';
 
