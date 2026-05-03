@@ -32,22 +32,14 @@ jobs:
         run: |
           echo "android/ not found, extracting from react-native package..."
           cd /tmp
-
-          # Download react-native package tarball
           PACKAGE_URL=$(npm view react-native@0.74.7 dist.tarball)
-          echo "Downloading: $PACKAGE_URL"
           curl -L -o react-native.tgz "$PACKAGE_URL" 2>&1
-
-          # Extract and find android/ template
           tar -xzf react-native.tgz
           if [ -d "package/template/android" ]; then
             cp -r package/template/android "${{ github.workspace }}/android"
             echo "android/ extracted from react-native package"
-            ls -la "${{ github.workspace }}/android/"
           else
             echo "ERROR: android/ not found in package template"
-            ls -la package/template/ 2>/dev/null || echo "template/ not found"
-            ls -la package/ 2>/dev/null || echo "package/ not found"
             exit 1
           fi
           rm -rf react-native.tgz package
@@ -58,19 +50,19 @@ jobs:
             echo "ERROR: android/build.gradle not found"
             exit 1
           fi
-          echo "android/ ready"
 
-      - name: Configure ABI splits
+      - name: Add ABI splits config
         run: |
-          if [ -f "android/app/build.gradle" ] && ! grep -q "splits" android/app/build.gradle; then
-            # Use node to insert splits config properly
-            node -e "
+          echo "Adding ABI splits configuration..."
+          npx ts-node -e "
 const fs = require('fs');
 let c = fs.readFileSync('android/app/build.gradle', 'utf8');
-c = c.replace(/(android\s*\{[\s\S]+?)(}\s*\n\})/m, '\$1\n        splits {\n            abi {\n                enable true\n                reset()\n                include \"arm64-v8a\"\n                universalApk true\n            }\n        }\n\$2');
-fs.writeFileSync('android/app/build.gradle', c);
+if (!c.includes('splits')) {
+  c = c.replace(/(\n\s+buildTypes\s*\{)/, '\n    splits {\n        abi {\n            enable true\n            reset()\n            include \"arm64-v8a\"\n            universalApk true\n        }\n    }\n$1');
+  fs.writeFileSync('android/app/build.gradle', c);
+  console.log('ABI splits added');
+}
 "
-          fi
 
       - name: Build debug APK
         working-directory: android
