@@ -159,8 +159,10 @@ export function getNextOccurrence(
 ): string | null {
   const startDate = new Date(startAt);
   const after = new Date(afterDate + 'T00:00:00');
-  if (after < startDate) {
-    return toISODate(startDate);
+  const startDateDay = toISODate(startDate);
+  const afterDay = toISODate(after);
+  if (afterDay < startDateDay) {
+    return startDateDay;
   }
   const endDate = new Date(afterDate + 'T00:00:00');
   endDate.setDate(endDate.getDate() + 365);
