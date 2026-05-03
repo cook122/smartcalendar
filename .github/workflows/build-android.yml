@@ -53,16 +53,16 @@ jobs:
 
       - name: Add ABI splits config
         run: |
-          echo "Adding ABI splits configuration..."
-          npx ts-node -e "
-const fs = require('fs');
-let c = fs.readFileSync('android/app/build.gradle', 'utf8');
-if (!c.includes('splits')) {
-  c = c.replace(/(\n\s+buildTypes\s*\{)/, '\n    splits {\n        abi {\n            enable true\n            reset()\n            include \"arm64-v8a\"\n            universalApk true\n        }\n    }\n$1');
-  fs.writeFileSync('android/app/build.gradle', c);
-  console.log('ABI splits added');
-}
-"
+          cat > add_splits.js << 'SCRIPT'
+          const fs = require('fs');
+          let c = fs.readFileSync('android/app/build.gradle', 'utf8');
+          if (!c.includes('splits')) {
+            c = c.replace(/(\n\s+buildTypes\s*\{)/, '\n    splits {\n        abi {\n            enable true\n            reset()\n            include "arm64-v8a"\n            universalApk true\n        }\n    }\n$1');
+            fs.writeFileSync('android/app/build.gradle', c);
+            console.log('ABI splits added');
+          }
+          SCRIPT
+          node add_splits.js
 
       - name: Build debug APK
         working-directory: android
