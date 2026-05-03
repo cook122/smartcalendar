@@ -63,14 +63,7 @@ jobs:
       - name: Configure ABI splits
         run: |
           if [ -f "android/app/build.gradle" ] && ! grep -q "splits" android/app/build.gradle; then
-            echo '    splits {
-        abi {
-            enable true
-            reset()
-            include "arm64-v8a"
-            universalApk true
-        }
-    }' >> android/app/build.gradle
+            printf '    splits {\n        abi {\n            enable true\n            reset()\n            include "arm64-v8a"\n            universalApk true\n        }\n    }\n' >> android/app/build.gradle
           fi
 
       - name: Build debug APK
