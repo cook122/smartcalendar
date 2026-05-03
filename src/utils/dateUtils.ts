@@ -26,7 +26,8 @@ export function addMonthsKeepDay(date: Date, months: number): Date {
   const originalDay = getDate(date);
   const newDate = addMonths(date, months);
   if (getDate(newDate) !== originalDay) {
-    return setDate(newDate, 0);
+    const lastDay = getDate(lastDayOfMonth(newDate));
+    newDate.setDate(Math.min(originalDay, lastDay));
   }
   return newDate;
 }

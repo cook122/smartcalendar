@@ -31,14 +31,14 @@ export function getOccurrences(
       current = new Date(startAt);
       current.setHours(0, 0, 0, 0);
       while (current <= rEnd && count < maxIterations) {
-        if (current >= rStart) {
-          addResult(result, localRule, current, startTime, count);
-          if (!isException(localRule, toISODate(current))) count++;
-        }
         if (localRule.endType === 'count' && count >= (localRule.endCount || 0)) break;
         if (localRule.endType === 'until') {
           const until = new Date(localRule.endUntil! + 'T00:00:00');
           if (current > until) break;
+        }
+        if (current >= rStart) {
+          addResult(result, localRule, current, startTime, count);
+          if (!isException(localRule, toISODate(current))) count++;
         }
         current = addDays(current, localRule.interval);
       }
@@ -165,7 +165,7 @@ export function getNextOccurrence(
   const endDate = new Date(afterDate + 'T00:00:00');
   endDate.setDate(endDate.getDate() + 365);
   const occurrences = getOccurrences(rule, startAt, afterDate, toISODate(endDate));
-  return occurrences.find(o => !o.isException && o.date > afterDate)?.date || null;
+  return occurrences.find(o => !o.isException && o.date >= afterDate)?.date || null;
 }
 
 export function getRuleDescription(rule: RecurrenceRule): string {
