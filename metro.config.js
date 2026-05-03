@@ -6,5 +6,6 @@ module.exports = {
         inlineRequires: true,
       },
     }),
+    assetRegistryPath: 'react-native/Libraries/Image/AssetRegistry',
   },
 };
