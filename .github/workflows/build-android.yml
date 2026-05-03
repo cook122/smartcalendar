@@ -63,7 +63,13 @@ jobs:
       - name: Configure ABI splits
         run: |
           if [ -f "android/app/build.gradle" ] && ! grep -q "splits" android/app/build.gradle; then
-            printf '    splits {\n        abi {\n            enable true\n            reset()\n            include "arm64-v8a"\n            universalApk true\n        }\n    }\n' >> android/app/build.gradle
+            # Use node to insert splits config properly
+            node -e "
+const fs = require('fs');
+let c = fs.readFileSync('android/app/build.gradle', 'utf8');
+c = c.replace(/(android\s*\{[\s\S]+?)(}\s*\n\})/m, '\$1\n        splits {\n            abi {\n                enable true\n                reset()\n                include \"arm64-v8a\"\n                universalApk true\n            }\n        }\n\$2');
+fs.writeFileSync('android/app/build.gradle', c);
+"
           fi
 
       - name: Build debug APK
