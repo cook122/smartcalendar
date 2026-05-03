@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView } from 're
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
-import { useEventStore } from '../../stores/eventStore';
-import { getSettings, saveSettings } from '../../storage/eventRepo';
-import { AppSettings, DEFAULT_SETTINGS, EVENT_COLORS } from '../../types';
+import { useEventStore } from '../stores/eventStore';
+import { getSettings, saveSettings } from '../storage/eventRepo';
+import { AppSettings, DEFAULT_SETTINGS, EVENT_COLORS } from '../types';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Settings'>;

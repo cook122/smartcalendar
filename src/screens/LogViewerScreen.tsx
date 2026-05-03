@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, TextInp
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
-import { useLogStore } from '../../stores/logStore';
+import { useLogStore } from '../stores/logStore';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'LogViewer'>;
