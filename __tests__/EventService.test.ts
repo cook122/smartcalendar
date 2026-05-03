@@ -2,9 +2,15 @@ import * as eventRepo from '@/storage/eventRepo';
 import * as EventService from '@/services/EventService';
 import { CalendarEvent } from '@/types';
 
-// Mock uuid to return predictable IDs
 jest.mock('uuid', () => ({
   v4: () => 'mock-uuid-1234',
+}));
+
+jest.mock('@/storage/eventRepo', () => ({
+  __esModule: true,
+  getAllEvents: jest.fn(),
+  saveEvent: jest.fn(),
+  deleteEvent: jest.fn(),
 }));
 
 describe('EventService', () => {

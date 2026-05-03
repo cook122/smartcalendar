@@ -2,18 +2,17 @@ import { useEventStore } from '@/stores/eventStore';
 import * as eventRepo from '@/storage/eventRepo';
 import { CalendarEvent } from '@/types';
 
-const realEventRepo = jest.requireActual('@/storage/eventRepo');
-
 jest.mock('uuid', () => ({
   v4: () => 'mock-uuid-store',
 }));
 
 jest.mock('@/storage/eventRepo', () => ({
   __esModule: true,
-  ...realEventRepo,
   getAllEvents: jest.fn(),
   saveEvent: jest.fn(),
   deleteEvent: jest.fn(),
+  getSettings: jest.fn(),
+  saveSettings: jest.fn(),
 }));
 
 describe('eventStore', () => {
