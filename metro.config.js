@@ -8,4 +8,9 @@ module.exports = {
     }),
     assetRegistryPath: 'react-native/Libraries/Image/AssetRegistry',
   },
+  resolver: {
+    extraNodeModules: {
+      'react-native-web': require.resolve('./emptyModule.js'),
+    },
+  },
 };
